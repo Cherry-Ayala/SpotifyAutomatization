@@ -23,10 +23,12 @@ def create_new_playlist():
     sp.playlist_add_items(new_playlist['id'], track_uris)
 
 def schedule_playlist_creation():
+
+    create_new_playlist()
     schedule.every().monday.at('10:30').do(create_new_playlist)
 
     while True:
-        schedule.run.pending()
+        schedule.run_pending()
         time.sleep(60)
 
 schedule_playlist_creation()
