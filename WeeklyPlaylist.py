@@ -1,21 +1,39 @@
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-
-client_id ='no la tengo'
-client_secret='no lo tengo'
-redirect_uri='solo si uso client credentials flow'
-
-client_credentials_manager = SpotifyClientCredentials (client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
-playlist_name = 'Descubrimiento Semanal'
-results = sp.search(q = 'Descubirmiento Semanal', type = 'playlist')
-playlist_id = results['playlists']['items'][0]['id']
-
+from spotipy.oauth2 import SpotifyOAuth
 import datetime
-new_playlist_name = f"{playlist_name} ({datetime.date.today()})"
-new_playlist = sp.user_playlist_create(user='mi user', name=new_playlist_name)
+import schedule
+import time
 
-tracks = sp.playlist_tracks(playlist_id)
-track_uris = [track['track']['uri'] for track in tracks['items']]
-sp.playlist_add_items(new_playlist['id'], track_uris)
+today = datetime.date.today()
+sunday = today + datetime.timedelta(days=(6 - today.weekday() + 7) % 7)
+
+scope = 'playlist-modify-private'
+playlist_name = 'Descubrimiento Semanal'
+sp = spotipy.Spotify(auth_manager = SpotifyOAuth(scope=scope))
+
+def create_new_playlist():
+    new_playlist_name = f"{playlist_name} {today.strftime('%b%d')}-{sunday.strftime('%b%d')}"
+    new_playlist = sp.user_playlist_create(user='mi user', name=new_playlist_name)
+
+    results = sp.search(q = 'Descubirmiento Semanal', type = 'playlist')
+    playlist_id = results['playlists']['items'][0]['id']
+
+    tracks = sp.playlist_tracks(playlist_id)
+    track_uris = [track['track']['uri'] for track in tracks['items']]
+    sp.playlist_add_items(new_playlist['id'], track_uris)
+
+def schedule_playlist_creation():
+    schedule.every().monday.at('10:30').do(create_new_playlist)
+
+    while True:
+        schedule.run.pending()
+        time.sleep(60)
+
+schedule_playlist_creation()
+
+
+
+
+
+
+
