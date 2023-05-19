@@ -9,6 +9,7 @@ sunday = today + datetime.timedelta(days=(6 - today.weekday() + 7) % 7)
 
 scope = 'playlist-modify-private'
 playlist_name = 'Descubrimiento Semanal'
+client_id = 'Your Client Id' #insert your client id, you can find it in spotify for developers... sadly the site isn't working at the time i made this
 sp = spotipy.Spotify(auth_manager = SpotifyOAuth(scope=scope))
 
 def create_new_playlist():
